@@ -3,9 +3,11 @@ import torch
 import numpy as np
 from PIL import Image
 import os
-import texture_transforms as custom_transforms
+
 from skimage.measure import compare_ssim
-from eval.InceptionScore import get_inception_score
+import importlib 
+importlib.import_module('util.texture_transforms')
+importlib.import_module('util.eval.InceptionScore')
 
 # Converts a Tensor into an image array (numpy)
 # |imtype|: the desired type of the converted numpy array
@@ -102,9 +104,9 @@ def visualize_texture(input_batch, guide_batch, target_batch, output_batch):
     mask_batch[mask_batch==-1] = 0
     guide_batch = guide_batch[:,0:3,:,:]
     ## denormalize to LAB
-    guide_batch = custom_transforms.denormalize_lab(guide_batch)
-    target_batch = custom_transforms.denormalize_lab(target_batch)
-    output_batch = custom_transforms.denormalize_lab(output_batch)
+    guide_batch = texture_transforms.denormalize_lab(guide_batch)
+    target_batch = texture_transforms.denormalize_lab(target_batch)
+    output_batch = texture_transforms.denormalize_lab(output_batch)
     # convert to RGB for visualization
     guide_batch = vis_image(guide_batch)
     target_batch = vis_image(target_batch)
@@ -133,7 +135,7 @@ def visualize_texture(input_batch, guide_batch, target_batch, output_batch):
 def save_texture_out(output_batch, path, index):
     output_batch = output_batch.detach().cpu()
     ## denormalize to LAB
-    output_batch = custom_transforms.denormalize_lab(output_batch)
+    output_batch = texture_transforms.denormalize_lab(output_batch)
     # convert to RGB for visualization
     output_batch = vis_image(output_batch)
     # get [h,w,c]
@@ -151,7 +153,7 @@ def vis_image(img):
     if torch.cuda.is_available():
         img = img.cpu()
     img = img.numpy()
-    ToRGB = custom_transforms.toRGB()
+    ToRGB = texture_transforms.toRGB()
     img_np = ToRGB(img)
     return img_np
 
@@ -222,7 +224,7 @@ def evaluate_pose(output_list, target_list):
     for i in range(len(output_list)):
         ssim.append(compare_ssim(output_list[i], target_list[i], multichannel=True))
     print ('SSIM Score: mean = %f, std= %f' %(np.mean(ssim),np.std(ssim)))
-    mean, std = get_inception_score(output_list)
+    mean, std = InceptionScore.get_inception_score(output_list)
     print ('Inception Score: mean = %f, std= %f' %(mean,std))
 	
 	
