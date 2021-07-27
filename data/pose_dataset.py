@@ -33,10 +33,20 @@ class PoseDataset(BaseDataset):
         return x, x_target, pose, pose_target, mask, mask_target
 
     def __getitem__(self, index):
-        path = os.path.join(self.root,'%d.pkl'%index)
+        # CHANGE PATH BC ITS NOT OPENING THE CORRECT DATASET
+        # loop for maybe opening both jpgs and pngs? not sure if this will work
+        # don't forget to import image and some other things first before implementing this one?
+        # imgs = []
+        # valid_images = [".jpg",".png"]
+        # for f in os.listdir(path):
+        #     ext = os.path.splitext(f)[1]
+        #     if ext.lower() not in valid_images:
+        #         continue
+        #         imgs.append(Image.open(os.path.join(path,f)))
+        path = os.path.join(self.root,'%d.jpg'%index) #all the img from robot are png? change this later
         pickle_in = open(path,"rb")
         sample = pickle.load(pickle_in)
-        
+
         x = sample['x']                     #(256, 256, 3)
         x_target = sample['x_target']       #(256, 256, 3)
         pose = sample['pose']               #(256, 256, 18)
@@ -61,9 +71,9 @@ class PoseDataset(BaseDataset):
         guide = pose_target
         target = (x_target/255)*2-1
         # Put data into [input, guide, target]
-        return {'A':input, 'guide':guide, 'B':target}        
+        return {'A':input, 'guide':guide, 'B':target}
 
- 
+
     def __len__(self):
         if (self.opt.isTrain):
             return 73340
